@@ -52,3 +52,5 @@ npm run build
 原PDFは変更・移動せず.gitignoreで除外。private/も除外しています。ViteのpublicDirは無効、公開対象はdistのみです。追跡済みファイルは.gitignoreだけでは除外されないため、将来Git利用時は追跡一覧も確認してください。内部文書や原資料の画面画像も公開前レビューが必要です。
 
 Netlifyはビルドコマンドnpm run build、公開ディレクトリdist。ユーザーの明示指示に基づきGitHub Pagesへの公開を準備しています。原資料・内部資料を除外してアプリのみ公開します。
+
+ホームには組入れ検討のタイミングと、Readiness-to wean → Flow weaning trial → Randomization／PCRTO → Readiness-to explantの早見表を表示します。組入前の共通指標は判定と同じ基準定義を参照しています。

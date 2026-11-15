@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import {criteria,evaluateEligibility,enrollmentAction,trialWindow,indicatorGroups,groupCheck,visDrugs,calculateVis,version,check,evaluate,update,type Answers,type Criterion} from './protocol';
 import {recordingGroups,flowRecords,pcrtoRecords,failureRecord} from './recording';
 import './style.css';
+import {ProtocolOverview} from './ProtocolOverview';
 const steps=[{title:'組入れ',short:'適格性・組入れ'},{title:'離脱試験',short:'離脱試験・記録'},{title:'ランダム割付',short:'割付・PCRTO'},{title:'ECMO離脱',short:'離脱後の記録'}];
 function App(){
  const [step,setStep]=useState(0),[a,setA]=useState<Answers>({}),[doses,setDoses]=useState<Answers>({}),[message,setMessage]=useState('');
@@ -15,7 +16,7 @@ function field(c:Criterion){const v=answers[c.id],status=check(c,v);return <sect
 async function copy(){const text=['研究組入れ確認用・正式登録未実施',version,...result.statuses,enrollmentAction,`組入日時（JST）：${a.enrolled??'未入力'}／試験開始予定・実績（JST）：${a.trialStart??'未入力'}`,trialWindow(a).message,trialWindow(a).deadline??'',...result.excluded,...result.unmet,...result.pending,...result.missing,...result.issues,...criteria.map(c=>`${c.question}：${answers[c.id]??'未回答'} ${c.unit}／基準 ${c.rule}／${c.source}`),'継続条件は医療者が確認'].join('\n');try{await navigator.clipboard.writeText(text);setMessage('確認内容をコピーしました。外部への自動送信は行っていません。');}catch{setMessage('コピーできませんでした。ブラウザのクリップボード権限を確認してください。');}}
 
 return <><header><button className="brand brand-button" onClick={()=>go(0)}><span className="brand-lockup"><span className="brand-kicker">S A F E <svg aria-hidden="true" viewBox="0 0 108 22" fill="none"><path d="M1 12h23l5-5 5 10 6-15 5 18 5-8h57" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg></span><strong className="brand-wordmark">ECM<span>OFF</span></strong><small>NAVIGATOR</small></span></button><span className="header-caption">研究組入れ支援</span></header>
-<main>{step===0?<><div className="hero"><p className="eyebrow">SAFE-ECMOFF NAVIGATOR</p><h1>研究のStepに沿って、<br/>組入れから記録まで。</h1><p>まず、離脱試験可能な状態と適格性を確認します。適格となったら大政へ連絡し、同意・組入れへ進みます。</p><button className="primary" onClick={()=>go(1)}>Step 1：適格性を確認する →</button><p className="muted">患者氏名・患者IDは入力しないでください。入力は保存されず、再読み込みで消えます。</p></div><div className="overview">{steps.map((s,i)=><div key={s.title}><b>Step {i+1}</b><span>{s.short}</span></div>)}</div></>:<>
+<main>{step===0?<><div className="hero"><p className="eyebrow">SAFE-ECMOFF NAVIGATOR</p><h1>研究のStepに沿って、<br/>組入れから記録まで。</h1><p>まず、離脱試験可能な状態と適格性を確認します。適格となったら大政へ連絡し、同意・組入れへ進みます。</p><button className="primary" onClick={()=>go(1)}>Step 1：適格性を確認する →</button><p className="muted">患者氏名・患者IDは入力しないでください。入力は保存されず、再読み込みで消えます。</p></div><ProtocolOverview/><button className="primary overview-start" onClick={()=>go(1)}>Step 1：適格性を確認する →</button></>:<>
 <nav className="progress" aria-label="プロトコールのStep">{steps.map((s,i)=><button key={s.title} aria-current={step===i+1?'step':undefined} className={step===i+1?'active':''} onClick={()=>go(i+1)}><b>{i+1}</b><span>{s.short}</span></button>)}</nav>
 <div className="step-heading"><p className="eyebrow">PROTOCOL <span>STEP {step} / 4</span></p><h1>{steps[step-1].title}</h1></div>
 {step===1&&<>
