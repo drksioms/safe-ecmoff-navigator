@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.DS_Store
+*.pdf
+*.PDF
+private/
+.env*
+.pnpm-store/
+docs/
+*.zip
+*.tar
+*.tar.gz
+/safe-ecmoff-navigator/
