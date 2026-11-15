@@ -3,7 +3,7 @@ import {createRoot} from 'react-dom/client';
 import {criteria,evaluateEligibility,enrollmentAction,trialWindow,indicatorGroups,groupCheck,visDrugs,calculateVis,version,check,evaluate,update,type Answers,type Criterion} from './protocol';
 import {recordingGroups,flowRecords,pcrtoRecords,failureRecord} from './recording';
 import './style.css';
-import {ProtocolOverview} from './ProtocolOverview';
+import {ProtocolOverview,ProtocolStepSummary} from './ProtocolOverview';
 const steps=[{title:'組入れ',short:'適格性・組入れ'},{title:'離脱試験',short:'離脱試験・記録'},{title:'ランダム割付',short:'割付・PCRTO'},{title:'ECMO離脱',short:'離脱後の記録'}];
 function App(){
  const [step,setStep]=useState(0),[a,setA]=useState<Answers>({}),[doses,setDoses]=useState<Answers>({}),[message,setMessage]=useState('');
@@ -19,6 +19,7 @@ return <><header><button className="brand brand-button" onClick={()=>go(0)}><spa
 <main>{step===0?<><div className="hero"><p className="eyebrow">SAFE-ECMOFF NAVIGATOR</p><h1>研究のStepに沿って、<br/>組入れから記録まで。</h1><p>まず、離脱試験可能な状態と適格性を確認します。適格となったら大政へ連絡し、同意・組入れへ進みます。</p><button className="primary" onClick={()=>go(1)}>Step 1：適格性を確認する →</button><p className="muted">患者氏名・患者IDは入力しないでください。入力は保存されず、再読み込みで消えます。</p></div><ProtocolOverview/><button className="primary overview-start" onClick={()=>go(1)}>Step 1：適格性を確認する →</button></>:<>
 <nav className="progress" aria-label="プロトコールのStep">{steps.map((s,i)=><button key={s.title} aria-current={step===i+1?'step':undefined} className={step===i+1?'active':''} onClick={()=>go(i+1)}><b>{i+1}</b><span>{s.short}</span></button>)}</nav>
 <div className="step-heading"><p className="eyebrow">PROTOCOL <span>STEP {step} / 4</span></p><h1>{steps[step-1].title}</h1></div>
+<ProtocolStepSummary step={step}/>
 {step===1&&<>
 <p>離脱試験可能な状態と適格性を確認 → <strong>適格となったら大政へ連絡</strong> → 説明・同意 → EDCで組入れ。</p>
 <h2 className="section-heading">基本適格性</h2>{criteria.filter(c=>c.stage===1).map(field)}
