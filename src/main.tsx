@@ -1,6 +1,6 @@
 import React,{useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {criteria,evaluateEligibility,enrollmentAction,trialWindow,indicatorGroups,groupCheck,visDrugs,calculateVis,version,check,evaluate,update,type Answers,type Criterion} from './protocol';
+import {criteria,readinessFlow,evaluateEligibility,enrollmentAction,trialWindow,indicatorGroups,groupCheck,visDrugs,calculateVis,version,check,evaluate,update,type Answers,type Criterion} from './protocol';
 import {recordingGroups,flowRecords,pcrtoRecords,failureRecord} from './recording';
 import './style.css';
 import {ProtocolOverview,ProtocolStepSummary} from './ProtocolOverview';
@@ -23,13 +23,13 @@ return <><header><button className="brand brand-button" onClick={()=>go(0)}><spa
 {step===1&&<>
 <p>離脱試験可能な状態と適格性を確認 → <strong>適格となったら大政へ連絡</strong> → 説明・同意 → EDCで組入れ。</p>
 <h2 className="section-heading">基本適格性</h2>{criteria.filter(c=>c.stage===1).map(field)}
-<h2 className="section-heading">離脱試験可能な状態</h2><p>ECMO 2.0 L/minで全共通指標を1時間以上満たしたことを確認します。</p>
+<h2 className="section-heading">離脱試験可能な状態</h2><p>ECMO {readinessFlow.label} {readinessFlow.unit}で全共通指標を1時間以上満たしたことを確認します。</p>
 <section className="card"><h3>心機能は左右それぞれ確認</h3><p>各行で一方を満たせば、その行のもう一方は未測定でもかまいません。左右の両方が必要です。</p>{indicatorGroups.map(g=><p key={g.id}><b>{g.question}：</b>{g.rule}<br/>{groupCheck(answers,g)==='pass'?'✓ 条件を満たす':groupCheck(answers,g)==='fail'?'! 両指標とも未達':'? 条件を満たす指標が未確認'}</p>)}</section>
 {criteria.filter(c=>c.stage===2).map(field)}
 <section className={'result '+(eligibility.eligible?'result-eligible':eligibility.unmet.length||eligibility.excluded.length?'result-unmet':'result-pending')} aria-live="polite"><p className="eyebrow">STEP 1 · 適格性判定</p><h2>{eligibility.label}</h2>{[...eligibility.excluded,...eligibility.unmet,...eligibility.missing,...eligibility.issues].length>0&&<ul>{[...eligibility.excluded,...eligibility.unmet,...eligibility.missing,...eligibility.issues].map(t=><li key={t}>{t}</li>)}</ul>}<p>入力に基づく組入れ候補の判定です。正式な組入れや離脱の判断を代行しません。</p></section>
 {eligibility.eligible&&<section className="notice"><h2>次は、大政へ連絡</h2><p><strong>{enrollmentAction}</strong></p><p>このタイミングで連絡し、その後に説明・同意、正式なEDC組入れへ進んでください。</p></section>}
 <h2 className="section-heading">連絡後：説明・同意と組入れ</h2><p>大政への連絡より後の手順です。正式な同意書・同意記録の代わりにはなりません。</p>{criteria.filter(c=>c.stage===3).map(field)}
-<section className="card"><h3>組入れの準備状況</h3>{result.pending.map(t=><p key={t}>△ {t}</p>)}{a.consent==='refused'&&<p className="error">参加拒否：組入れの対象外です。</p>}{['self','proxy'].includes(a.consent)&&eligibility.eligible&&<p>✓ 適格性と同意状況を確認しました。正式な組入れはEDCで行ってください。</p>}<p>組入時（ECMO 2.0 L/min）の実測値を印刷済み用紙へ記録し、EDCに入力します。</p></section>
+<section className="card"><h3>組入れの準備状況</h3>{result.pending.map(t=><p key={t}>△ {t}</p>)}{a.consent==='refused'&&<p className="error">参加拒否：組入れの対象外です。</p>}{['self','proxy'].includes(a.consent)&&eligibility.eligible&&<p>✓ 適格性と同意状況を確認しました。正式な組入れはEDCで行ってください。</p>}<p>組入時（ECMO {readinessFlow.label} {readinessFlow.unit}）の実測値を印刷済み用紙へ記録し、EDCに入力します。</p></section>
 <details className="card"><summary>入力内容を確認</summary>{criteria.map(c=><div className="audit" key={c.id}><b>{c.question}</b><p>{answers[c.id]??'未回答'} {c.unit} ／基準 {c.rule}</p></div>)}</details><button onClick={copy}>確認内容をテキストコピー</button> <button onClick={resetState}>状態悪化・再評価</button>
 </>}
 {step===2&&<>

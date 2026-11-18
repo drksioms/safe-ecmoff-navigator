@@ -6,6 +6,8 @@ export type Answers=Record<string,string>;
 export type Criterion={id:string;question:string;protocolStep:1;stage:1|2|3;kind:'inclusion'|'exclusion'|'number'|'confirmation'|'consent';unit:string;rule:string;required:boolean;source:string;note:string;unresolved:boolean;min?:number;max?:number;strictMin?:boolean;strictMax?:boolean};
 const meeting='SAFE_ECMOFF_班会議①_KM102626.pdf（表紙 2026/10/28、版・承認情報なし）';
 const a=(id:string,question:string,stage:1|2|3,kind:Criterion['kind'],rule:string,page:number,note='',unresolved=false):Criterion=>({id,question,protocolStep:1,stage,kind,rule,source:`${meeting} PDF p.${page}`,unit:'',required:true,note,unresolved});
+// Step 1の流量条件。表示と判定の共通定義。2026-11-18ユーザー確認。
+export const readinessFlow={min:1.8,max:2.2,label:'2.0±0.2',unit:'L/min'} as const;
 export const criteria:Criterion[]=[
 a('adult','同意取得時の年齢が18歳以上である',1,'inclusion','18歳以上',5),
 a('peripheral','Peripheral V-A ECMOからの離脱を検討している',1,'inclusion','Peripheral V-A ECMO',5),
@@ -20,7 +22,7 @@ a('peripheral','Peripheral V-A ECMOからの離脱を検討している',1,'incl
 ['inappropriate','担当医が研究参加を不適切と判断している','']
 ].map(([id,q,n])=>a(id,q,1,'exclusion','該当で対象外',5,n)),
 ...[
-['flow','観察時のECMO流量','L/min',2,2,false,false,'2.0',false],
+['flow','観察時のECMO流量',readinessFlow.unit,readinessFlow.min,readinessFlow.max,false,false,readinessFlow.label,false],
 ['map','MAP','mmHg',60,undefined,true,false,'> 60',false],
 ['lac','乳酸','mmol/L',undefined,2,false,true,'< 2.0',false],
 ['cvp','CVP','mmHg',undefined,18,false,true,'< 18',false],
@@ -30,7 +32,7 @@ a('peripheral','Peripheral V-A ECMOからの離脱を検討している',1,'incl
 ['ci','CI','L/min/m²',2.2,undefined,false,false,'≧2.2',false],
 ['tapse','TAPSE','mm',10,undefined,false,false,'≧10',false],
 ['papi','PAPi','比',0.9,undefined,false,false,'≧0.9',false]
-].map(([id,q,unit,min,max,sm,sx,rule,u])=>({...a(String(id),String(q),2,'number',String(rule),8,'現在値だけで継続達成としません。左心機能はLVEFまたはCI、右心機能はTAPSEまたはPAPi。両行が必要です。',Boolean(u)),unit:String(unit),min:min as number|undefined,max:max as number|undefined,strictMin:Boolean(sm),strictMax:Boolean(sx),required:!['lvef','ci','tapse','papi'].includes(String(id))})),
+].map(([id,q,unit,min,max,sm,sx,rule,u])=>({...a(String(id),String(q),2,'number',String(rule),8,'現在値だけで継続達成としません。左心機能はLVEFまたはCI、右心機能はTAPSEまたはPAPi。両行が必要です。',Boolean(u)),...(String(id)==='flow'?{source:'SAFE-ECMOFF Trial _配布資料_KM081426.pdf（正式版記載なし）PDF p.1／2026-11-18ユーザー確認'}:{}),unit:String(unit),min:min as number|undefined,max:max as number|undefined,strictMin:Boolean(sm),strictMax:Boolean(sx),required:!['lvef','ci','tapse','papi'].includes(String(id))})),
 a('pulse','拍動性波形を認める',2,'confirmation','認める',8,'原文：Pulsatile atrial waveform'),
 a('vt','VT/VFの有無',2,'exclusion','なし',8),
 a('valve','重度の弁膜症の有無',2,'exclusion','なし',8),

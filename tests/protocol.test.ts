@@ -28,7 +28,7 @@ describe('VIS計算（配布資料p.2）',()=>{
  for(const [dose,expected] of [['0.29999','pass'],['0.3','fail'],['0.30001','fail']])it('VIS30境界 '+dose,()=>{const v=calculateVis({...zero,norad:dose});expect(check(criteria.find(c=>c.id==='vis')!,String(v))).toBe(expected);});
 });
 
-describe("確認済み流量条件",()=>{for(const [v,expected] of [[1.8,"fail"],[1.999,"fail"],[2,"pass"],[2.001,"fail"],[2.2,"fail"]] as const)it(String(v)+" L/min",()=>expect(check(criteria.find(c=>c.id==="flow")!,String(v))).toBe(expected));});
+describe("確認済み流量条件",()=>{for(const [v,expected] of [[1.799,"fail"],[1.8,"pass"],[1.801,"pass"],[1.999,"pass"],[2,"pass"],[2.001,"pass"],[2.199,"pass"],[2.2,"pass"],[2.201,"fail"]] as const)it(String(v)+" L/min",()=>expect(check(criteria.find(c=>c.id==="flow")!,String(v))).toBe(expected));});
 
 describe("確認済みエコー／SG境界",()=>{for(const [id,value] of [["lvef",20],["ci",2.2],["tapse",10],["papi",0.9]] as const)it(id+"は境界値を含む",()=>{const c=criteria.find(c=>c.id===id)!;expect(check(c,String(value))).toBe("pass");expect(check(c,String(value-0.001))).toBe("fail");expect(check(c,String(value+0.001))).toBe("pass");expect(c.unresolved).toBe(false);});});
 
@@ -88,4 +88,13 @@ describe('プロトコールStep 1の適格性と連絡順序',()=>{
  it('空欄の薬剤だけを0とし他の欠測を正常にしない',()=>{expect(calculateVis({})).toBe(0);expect(calculateVis({norad:'0.06',dobutamine:'1'})).toBe(7);expect(evaluateEligibility({...complete(),map:''}).eligible).toBe(false);});
  it('不明投与量を達成にしない',()=>expect(calculateVis({norad:'unknown'})).toBe(null));
  it('空欄を0にするのは薬剤欄のみ',()=>expect(check(criteria.find(c=>c.id==='vis')!,'')).toBe('unknown'));
+});
+
+describe('Step 1の流量許容幅と継続確認',()=>{
+ for(const flow of ['1.8','2','2.2'])it(flow+'で他条件達成なら適格',()=>expect(evaluateEligibility({...complete(),flow}).eligible).toBe(true));
+ for(const flow of ['1.799','2.201'])it(flow+'は現時点未達',()=>{const r=evaluateEligibility({...complete(),flow});expect(r.eligible).toBe(false);expect(r.unmet.some(t=>t.includes('ECMO流量'))).toBe(true);});
+ it('範囲内でも継続確認の欠測は保留',()=>expect(evaluateEligibility({...complete(),flow:'1.8',sustained:''}).eligible).toBe(false));
+ it('範囲内でも継続未達は未達',()=>expect(evaluateEligibility({...complete(),flow:'2.2',sustained:'no'}).eligible).toBe(false));
+ for(const flow of ['', 'unknown'])it('流量欠測・不明を達成にしない '+flow,()=>expect(evaluateEligibility({...complete(),flow}).eligible).toBe(false));
+ it('範囲内の流量変更でも継続・同意を再確認',()=>{const a=update(complete(),'flow','1.8');expect(a.sustained).toBeUndefined();expect(a.consent).toBeUndefined();});
 });
